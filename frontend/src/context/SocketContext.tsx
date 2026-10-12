@@ -2,6 +2,8 @@ import React, { createContext, useContext, useEffect, useState, type ReactNode }
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
+import { soundEffects } from '../utils/soundEffects';
+
 export interface TickerBid {
   auctionId: string;
   bidId: string;
@@ -84,9 +86,7 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     });
 
     socketClient.on('user:outbid', (data: { auctionTitle: string; newHighestBid: number }) => {
-      import('../utils/soundEffects').then(({ soundEffects }) => {
-        soundEffects.playOutbidSound();
-      });
+      soundEffects.playOutbidSound();
       addToast({
         type: 'alert',
         title: 'You Have Been Outbid!',
@@ -96,9 +96,7 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
     socketClient.on('ticker:status_changed', (data: { auctionId: string; status: string; winnerName?: string; finalBid?: number }) => {
       if (data.status === 'ENDED' && data.winnerName) {
-        import('../utils/soundEffects').then(({ soundEffects }) => {
-          soundEffects.playGavelSound();
-        });
+        soundEffects.playGavelSound();
         addToast({
           type: 'success',
           title: 'Auction Concluded!',

@@ -11,17 +11,18 @@ COPY frontend/ ./
 RUN npm run build
 
 # Stage 2: Build Backend
-FROM node:20-alpine AS backend-builder
+FROM node:20-slim AS backend-builder
+RUN apt-get update -y && apt-get install -y openssl
 WORKDIR /app/backend
 COPY backend/package*.json ./
 RUN npm install
 COPY backend/ ./
 RUN npx prisma generate
-RUN npx prisma db push
 RUN npm run build
 
 # Stage 3: Production Runner
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
+RUN apt-get update -y && apt-get install -y openssl
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=5000
@@ -43,5 +44,4 @@ COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 EXPOSE 5000
 
-# Run database migration/seed check and start production server
 CMD ["node", "backend/dist/server.js"]
