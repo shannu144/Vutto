@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+*.log
+.DS_Store
+.vscode
+.idea
+dev.db-journal
+dev.db-wal
+dev.db-shm

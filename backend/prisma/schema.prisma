@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  name         String
+  role         String     @default("BUYER") // "ADMIN" | "BUYER"
+  balance      Float      @default(100000.0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  bids            Bid[]
+  wonAuctions     Auction[]  @relation("AuctionWinner")
+  createdAuctions Auction[]  @relation("AuctionCreator")
+  auditLogs       AuditLog[]
+}
+
+model Bike {
+  id                String       @id @default(cuid())
+  make              String
+  model             String
+  year              Int
+  engineCc          Int
+  mileage           Int
+  vin               String       @unique
+  conditionScore    Float        @default(9.0)
+  inspectionSummary String
+  location          String
+  primaryImage      String
+  imagesJson        String       // JSON array of image URLs
+  specsJson         String       // JSON key-values (HP, torque, exhaust, etc.)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  auctions          Auction[]
+}
+
+model Auction {
+  id                         String    @id @default(cuid())
+  title                      String
+  bikeId                     String
+  bike                       Bike      @relation(fields: [bikeId], references: [id], onDelete: Cascade)
+  startingPrice              Float
+  reservePrice               Float     @default(0.0)
+  minIncrement               Float     @default(100.0)
+  currentBid                 Float     @default(0.0)
+  currentWinnerId            String?
+  winner                     User?     @relation("AuctionWinner", fields: [currentWinnerId], references: [id])
+  status                     String    @default("UPCOMING") // "DRAFT" | "UPCOMING" | "LIVE" | "ENDED" | "CANCELLED" | "SETTLED"
+  startTime                  DateTime
+  endTime                    DateTime
+  originalEndTime            DateTime
+  antiSnipingSeconds         Int       @default(60)
+  antiSnipingExtensionsCount Int       @default(0)
+  isReserveMet               Boolean   @default(false)
+  createdById                String?
+  creator                    User?     @relation("AuctionCreator", fields: [createdById], references: [id])
+  createdAt                  DateTime  @default(now())
+  updatedAt                  DateTime  @updatedAt
+
+  bids                       Bid[]
+
+  @@index([status])
+  @@index([endTime])
+}
+
+model Bid {
+  id        String   @id @default(cuid())
+  auctionId String
+  auction   Auction  @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+  bidderId  String
+  bidder    User     @relation(fields: [bidderId], references: [id], onDelete: Cascade)
+  amount    Float
+  timestamp DateTime @default(now())
+  isWinning Boolean  @default(false)
+  ipAddress String?
+
+  @@index([auctionId, timestamp])
+  @@index([bidderId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  actorId   String?
+  actor     User?    @relation(fields: [actorId], references: [id])
+  details   String   // JSON string
+  timestamp DateTime @default(now())
+  ipAddress String?
+
+  @@index([action])
+  @@index([timestamp])
+}
