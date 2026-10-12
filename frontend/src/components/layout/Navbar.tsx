@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth, PRESET_ACCOUNTS } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
-import { ShieldCheck, Wallet, ChevronDown } from 'lucide-react';
+import { ShieldCheck, Wallet, ChevronDown, Volume2, VolumeX } from 'lucide-react';
+import { soundEffects } from '../../utils/soundEffects';
 
 interface NavbarProps {
   activeTab: 'auctions' | 'my-bids' | 'admin';
@@ -11,6 +12,15 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
   const { user, switchPreset } = useAuth();
   const { isConnected } = useSocket();
+  const [isMuted, setIsMuted] = useState(() => soundEffects.getMuted());
+
+  const handleToggleSound = () => {
+    const muted = soundEffects.toggleMute();
+    setIsMuted(muted);
+    if (!muted) {
+      soundEffects.playBidSound();
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
@@ -72,9 +82,22 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
             </button>
           </nav>
 
-          {/* Right Controls: Real-time status, Demo user switcher, Balance */}
-          <div className="flex items-center space-x-3">
+          {/* Right Controls: Real-time status, Demo user switcher, Balance, Audio */}
+          <div className="flex items-center space-x-2 sm:space-x-3">
             
+            {/* Live Audio Toggle */}
+            <button
+              onClick={handleToggleSound}
+              title={isMuted ? 'Unmute Live Audio Cues' : 'Mute Audio Cues'}
+              className={`p-1.5 rounded-lg border transition ${
+                isMuted
+                  ? 'bg-slate-800/80 border-slate-700 text-slate-500 hover:text-slate-300'
+                  : 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20'
+              }`}
+            >
+              {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            </button>
+
             {/* Live Socket Connection Status */}
             <div
               title={isConnected ? 'Real-time WebSocket Connected' : 'Reconnecting to Live Auction Stream...'}

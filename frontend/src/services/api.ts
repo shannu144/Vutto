@@ -16,6 +16,7 @@ apiClient.interceptors.request.use((config) => {
 });
 
 export const api = {
+  // Auth
   async login(email: string, password: string): Promise<{ token: string; user: User }> {
     const res = await apiClient.post('/api/auth/login', { email, password });
     return res.data;
@@ -31,6 +32,7 @@ export const api = {
     return res.data;
   },
 
+  // Auctions
   async getAuctions(status?: string, search?: string): Promise<{ auctions: Auction[]; total: number }> {
     const params: any = {};
     if (status) params.status = status;
@@ -44,6 +46,7 @@ export const api = {
     return res.data;
   },
 
+  // Bids
   async placeBid(auctionId: string, amount: number): Promise<{ message: string; bid: Bid; auction: Auction }> {
     const res = await apiClient.post('/api/bids', { auctionId, amount });
     return res.data;
@@ -54,6 +57,34 @@ export const api = {
     return res.data;
   },
 
+  // Proxy Auto-Bidding
+  async setAutoBid(auctionId: string, maxAmount: number): Promise<{ message: string; autoBid: any }> {
+    const res = await apiClient.post('/api/bids/auto-bid', { auctionId, maxAmount });
+    return res.data;
+  },
+
+  async getAutoBid(auctionId: string): Promise<{ maxAmount: number } | null> {
+    const res = await apiClient.get(`/api/bids/auto-bid/${auctionId}`);
+    return res.data;
+  },
+
+  async deleteAutoBid(auctionId: string): Promise<{ message: string }> {
+    const res = await apiClient.delete(`/api/bids/auto-bid/${auctionId}`);
+    return res.data;
+  },
+
+  // Watchlist
+  async toggleWatchlist(auctionId: string): Promise<{ isWatched: boolean }> {
+    const res = await apiClient.post(`/api/auctions/${auctionId}/watch`);
+    return res.data;
+  },
+
+  async getWatchlist(): Promise<Auction[]> {
+    const res = await apiClient.get('/api/auctions/watchlist/me');
+    return res.data;
+  },
+
+  // Admin
   async createAuction(data: any): Promise<Auction> {
     const res = await apiClient.post('/api/admin/auctions', data);
     return res.data;
@@ -86,6 +117,13 @@ export const api = {
 
   async getSystemOverview(): Promise<SystemOverview> {
     const res = await apiClient.get('/api/admin/system-overview');
+    return res.data;
+  },
+
+  async exportLedgerCsv(auctionId: string): Promise<Blob> {
+    const res = await apiClient.get(`/api/admin/auctions/${auctionId}/export-csv`, {
+      responseType: 'blob',
+    });
     return res.data;
   },
 };

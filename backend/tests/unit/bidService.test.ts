@@ -36,10 +36,11 @@ describe('BidService Logic & Anti-Sniping', () => {
     const auction = await prisma.auction.findUnique({ where: { id: liveAuctionId } });
     const insufficientAmount = (auction?.currentBid || 1000) - 100;
 
+    // Use Elena so we don't hit the "already highest bidder" guard
     await expect(
       bidService.placeBid({
         auctionId: liveAuctionId,
-        bidderId: buyerMarcusId,
+        bidderId: buyerElenaId,
         amount: insufficientAmount,
       })
     ).rejects.toThrow(/insufficient/i);
@@ -56,12 +57,12 @@ describe('BidService Logic & Anti-Sniping', () => {
   });
 
   it('should reject a bid if user has insufficient balance', async () => {
-    // User Marcus has $120,000 balance in seed
+    // Use Elena (different from current high bidder) so balance check fires correctly
     await expect(
       bidService.placeBid({
         auctionId: liveAuctionId,
-        bidderId: buyerMarcusId,
-        amount: 999999999, // Exceeds balance
+        bidderId: buyerElenaId,
+        amount: 999999999, // Exceeds any seeded balance
       })
     ).rejects.toThrow(/Insufficient available bidding balance/i);
   });

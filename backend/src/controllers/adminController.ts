@@ -146,4 +146,17 @@ export const adminController = {
       next(err);
     }
   },
+
+  async exportLedgerCsv(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = req.params.id as string;
+      const { bidService } = await import('../services/bidService');
+      const csv = await bidService.exportAuctionLedgerCsv(id);
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename=auction_${id}_ledger.csv`);
+      res.send(csv);
+    } catch (err) {
+      next(err);
+    }
+  },
 };

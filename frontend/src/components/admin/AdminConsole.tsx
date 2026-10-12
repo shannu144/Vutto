@@ -15,6 +15,7 @@ import {
   Clock,
   Layers,
   CheckCircle,
+  Download,
 } from 'lucide-react';
 
 interface AdminConsoleProps {
@@ -118,6 +119,22 @@ export const AdminConsole: React.FC<AdminConsoleProps> = ({
       setTimeout(() => setMessage(null), 4000);
     } catch (err: any) {
       setMessage({ type: 'error', text: err.response?.data?.error || err.message });
+    }
+  };
+
+  const handleExportCsv = async (auctionId: string, title: string) => {
+    try {
+      const blob = await api.exportLedgerCsv(auctionId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `audit_ledger_${title.replace(/[^a-zA-Z0-9]/g, '_')}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      setMessage({ type: 'success', text: `Verifiable audit ledger for "${title}" exported successfully.` });
+      setTimeout(() => setMessage(null), 4000);
+    } catch (err: any) {
+      setMessage({ type: 'error', text: 'Failed to export CSV ledger' });
     }
   };
 
@@ -393,6 +410,15 @@ export const AdminConsole: React.FC<AdminConsoleProps> = ({
                         Cancel
                       </button>
                     )}
+
+                    <button
+                      onClick={() => handleExportCsv(a.id, a.title)}
+                      title="Export Verifiable Audit Ledger CSV"
+                      className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[11px] inline-flex items-center space-x-1"
+                    >
+                      <Download className="w-3 h-3" />
+                      <span>Ledger CSV</span>
+                    </button>
                   </td>
                 </tr>
               ))}

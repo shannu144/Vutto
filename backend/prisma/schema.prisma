@@ -18,6 +18,8 @@ model User {
   updatedAt    DateTime   @updatedAt
 
   bids            Bid[]
+  autoBids        AutoBid[]
+  watchlist       Watchlist[]
   wonAuctions     Auction[]  @relation("AuctionWinner")
   createdAuctions Auction[]  @relation("AuctionCreator")
   auditLogs       AuditLog[]
@@ -67,6 +69,8 @@ model Auction {
   updatedAt                  DateTime  @updatedAt
 
   bids                       Bid[]
+  autoBids                   AutoBid[]
+  watchlist                  Watchlist[]
 
   @@index([status])
   @@index([endTime])
@@ -85,6 +89,32 @@ model Bid {
 
   @@index([auctionId, timestamp])
   @@index([bidderId])
+}
+
+model AutoBid {
+  id        String   @id @default(cuid())
+  auctionId String
+  auction   Auction  @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+  bidderId  String
+  bidder    User     @relation(fields: [bidderId], references: [id], onDelete: Cascade)
+  maxAmount Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([auctionId, bidderId])
+  @@index([auctionId])
+}
+
+model Watchlist {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  auctionId String
+  auction   Auction  @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, auctionId])
+  @@index([userId])
 }
 
 model AuditLog {

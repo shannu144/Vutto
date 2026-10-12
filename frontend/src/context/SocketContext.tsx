@@ -84,6 +84,9 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     });
 
     socketClient.on('user:outbid', (data: { auctionTitle: string; newHighestBid: number }) => {
+      import('../utils/soundEffects').then(({ soundEffects }) => {
+        soundEffects.playOutbidSound();
+      });
       addToast({
         type: 'alert',
         title: 'You Have Been Outbid!',
@@ -93,6 +96,9 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
     socketClient.on('ticker:status_changed', (data: { auctionId: string; status: string; winnerName?: string; finalBid?: number }) => {
       if (data.status === 'ENDED' && data.winnerName) {
+        import('../utils/soundEffects').then(({ soundEffects }) => {
+          soundEffects.playGavelSound();
+        });
         addToast({
           type: 'success',
           title: 'Auction Concluded!',

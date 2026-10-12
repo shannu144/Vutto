@@ -25,6 +25,15 @@ router.get('/api/auctions/:id', auctionController.getById);
 router.post('/api/bids', authenticate, bidController.placeBid);
 router.get('/api/bids/my-bids', authenticate, bidController.getMyBids);
 
+// Proxy Auto-Bid Engine Routes
+router.post('/api/bids/auto-bid', authenticate, bidController.setAutoBid);
+router.get('/api/bids/auto-bid/:auctionId', authenticate, bidController.getAutoBid);
+router.delete('/api/bids/auto-bid/:auctionId', authenticate, bidController.deleteAutoBid);
+
+// Watchlist Routes
+router.post('/api/auctions/:id/watch', authenticate, bidController.toggleWatchlist);
+router.get('/api/auctions/watchlist/me', authenticate, bidController.getWatchlist);
+
 // Admin Routes (Role: ADMIN)
 router.post('/api/admin/auctions', authenticate, requireAdmin, adminController.createAuction);
 router.post('/api/admin/auctions/:id/start', authenticate, requireAdmin, adminController.startAuction);
@@ -33,3 +42,4 @@ router.post('/api/admin/auctions/:id/cancel', authenticate, requireAdmin, adminC
 router.post('/api/admin/bot-simulation', authenticate, requireAdmin, adminController.toggleBotSimulation);
 router.get('/api/admin/bot-simulation', authenticate, requireAdmin, adminController.getBotStatus);
 router.get('/api/admin/system-overview', authenticate, requireAdmin, adminController.getSystemOverview);
+router.get('/api/admin/auctions/:id/export-csv', authenticate, requireAdmin, adminController.exportLedgerCsv);
