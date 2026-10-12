@@ -4,6 +4,14 @@ A production-grade, high-concurrency real-time auction platform engineered for l
 
 ---
 
+## 🌐 Live Production Deployment
+
+- **Live URL**: **[https://vutto-bike-auction.onrender.com/](https://vutto-bike-auction.onrender.com/)**
+- **Health Check**: [https://vutto-bike-auction.onrender.com/health](https://vutto-bike-auction.onrender.com/health)
+- **Prometheus Telemetry**: [https://vutto-bike-auction.onrender.com/metrics](https://vutto-bike-auction.onrender.com/metrics)
+
+---
+
 ## 🚀 Key Highlights & Architectural Features
 
 - **Real-Time Bidding with Sub-Second Synchronization**: Powered by Socket.IO over WebSockets with room partitioning, live tickers, and targeted outbid alerts.
