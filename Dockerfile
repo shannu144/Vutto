@@ -17,6 +17,7 @@ COPY backend/package*.json ./
 RUN npm install
 COPY backend/ ./
 RUN npx prisma generate
+RUN npx prisma db push
 RUN npm run build
 
 # Stage 3: Production Runner

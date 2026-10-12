@@ -11,6 +11,8 @@ export const prisma = new PrismaClient({
 prisma.$on('warn', (e) => logger.warn(`Prisma: ${e.message}`));
 prisma.$on('error', (e) => logger.error(`Prisma error: ${e.message}`));
 
+import { autoSeedIfEmpty } from './autoSeed';
+
 // Enable SQLite Write-Ahead Logging (WAL) mode for fast concurrent reads & writes
 export async function initializeDatabase() {
   try {
@@ -19,5 +21,12 @@ export async function initializeDatabase() {
     logger.info('Database initialized with SQLite WAL mode.');
   } catch (err: any) {
     logger.warn('Could not set WAL mode (might not be SQLite):', err.message);
+  }
+
+  // Ensure initial production seed exists on fresh container/cloud environments
+  try {
+    await autoSeedIfEmpty();
+  } catch (err: any) {
+    logger.warn('Could not run auto-seed check:', err.message);
   }
 }
